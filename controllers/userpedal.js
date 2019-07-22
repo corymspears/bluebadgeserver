@@ -4,10 +4,10 @@ var userPedals = sequelize.import('../models/userpedal');
 
 
 router.post('/', function(req, res){
-
+	// console.log('req.user', req.user)
 	// values of user input are assigned to variables
-    var email = req.body.email;
-    var boardId = req.body.boardId
+	var email = req.user.email;
+    var boardId = req.body.boardId;
     var pedalId = req.body.pedalId;
 
     console.log(req.body);
@@ -34,20 +34,42 @@ router.post('/', function(req, res){
 	);
 });
 
-router.get('/:userpedal', function(req, res){
-    var email = req.params.userpedal;
-    console.log(email);
-	userPedals.findAll({
-			where: { eMail: email}
+// Get one userpedal
+router.get('/:id', function(req, res){
+	var pedalid = req.params.id;
+	console.log(pedalid);
+	userPedals.findOne({
+			where: {id: pedalid}
 		}).then(
-			function findAllSuccess(data){
+			function findOneSuccess(data){
 				res.json(data);
 				console.log(data);
 			},
-			function findAllError(err){
+			function findOneError(err){
 				res.send(500, err.message);
 			}
 		);
+});
+
+// Update userpedal
+router.put('/:id', (req, res) => {
+	var pedalid = req.params.id;
+	var boardId = req.body.boardId;
+	var pedalId = req.body.pedalId;
+
+	userPedals.update({boardId: boardId, pedalId: pedalId},
+		{where: {id: pedalid, email: req.user.email}})
+
+	  .then(userpedal => res.status(200).json(userpedal))
+	  .catch(err => res.json({error:err}))
+});
+
+// Delete userpedal
+router.delete('/:id', (req, res) => {
+	var pedalid = req.params.id;
+  userPedals.destroy({where : {id:pedalid}})
+  .then(userpedal => res.status(200).json(userpedal))
+  .catch(err => res.json({error:err}))
 });
 
 router.get('/health', function(req, res){
