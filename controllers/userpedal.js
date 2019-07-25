@@ -7,7 +7,6 @@ router.post('/', function(req, res){
 	// console.log('req.user', req.user)
 	// values of user input are assigned to variables
 	var email = req.user.email;
-    var boardId = req.body.boardId;
     var pedalId = req.body.pedalId;
 
     console.log(req.body);
@@ -16,7 +15,6 @@ router.post('/', function(req, res){
 	userPedals.create({
 		email: email,
         pedalId: pedalId,
-        boardId: boardId
 	}).then(
 		function createSuccess(userpedal) {
 			// after user is created, assign a token to userpedal
@@ -54,10 +52,9 @@ router.get('/:id', function(req, res){
 // Update userpedal
 router.put('/:id', (req, res) => {
 	var pedalid = req.params.id;
-	var boardId = req.body.boardId;
 	var pedalId = req.body.pedalId;
 
-	userPedals.update({boardId: boardId, pedalId: pedalId},
+	userPedals.update({pedalId: pedalId},
 		{where: {id: pedalid, email: req.user.email}})
 
 	  .then(userpedal => res.status(200).json(userpedal))
