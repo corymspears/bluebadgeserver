@@ -14,14 +14,17 @@ app.use(bodyParser.json());
 
 // allows api to be accessed by browsers or other elements outside of port 5000
 app.use(require('./middleware/headers'));
+
+// create user route
+app.use('/api/user', require('./controllers/user'));
+
 // checks to see if token that was given matches the header of every request
 app.use(require('./middleware/validate-session'));
 
 
 // CONTROLLERS ///////////////////////////////////////////////////////////////
 
-// create user route
-app.use('/api/user', require('./controllers/user'));
+
 // userpedalroute
 app.use('/api/userpedal', require('./controllers/userpedal'));
 

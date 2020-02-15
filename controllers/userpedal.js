@@ -2,29 +2,58 @@ var router = require('express').Router();
 var sequelize = require('../db.js');
 var userPedals = sequelize.import('../models/userpedal');
 
-
+// Create userpedal
 router.post('/', function(req, res){
+	console.log("o")
 	// console.log('req.user', req.user)
 	// values of user input are assigned to variables
-	var email = req.user.email;
-    var pedalId = req.body.pedalId;
+	var email = req.body.email;
+    var pedalId = req.body.pedals;
 
     console.log(req.body);
 
 	// User model communicates with Postgres to create a new userpedal
-	userPedals.create({
-		email: email,
-        pedalId: pedalId,
+	// userPedals.create({
+	// 	email: email,
+    //     pedalId: pedalId,
+	// }).then(
+	// 	function createSuccess(userpedal) {
+	// 		// after user is created, assign a token to userpedal
+	// 		// var token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: 60*60*24 } );
+	// 		// respond with a json string including user's token
+	// 		res.json({
+	// 			userpedal: userpedal,
+	// 			message: 'created',
+	// 			// sessionToken: token
+	// 		});
+	// 	},
+	// 	function createError(err) {
+	// 		res.send(500, err.message);
+	// 	}
+	// );
+	userPedals.findOrCreate({
+		defaults: {
+			email: email,
+			pedalId: pedalId,
+		},
+		where: {email: email}
 	}).then(
 		function createSuccess(userpedal) {
 			// after user is created, assign a token to userpedal
 			// var token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: 60*60*24 } );
 			// respond with a json string including user's token
-			res.json({
-				userpedal: userpedal,
-				message: 'created',
-				// sessionToken: token
-			});
+			if (userpedal[1]) {
+				res.json({
+					userpedal: userpedal,
+					message: 'created new board',
+					// sessionToken: token
+				});
+			} else {
+				userPedals.update({pedalId: pedalId},
+					{where: {email: email}})
+				  .then(updateresponse => res.status(200).json(updateresponse))
+				  .catch(err => res.json({error:err}))
+			}
 		},
 		function createError(err) {
 			res.send(500, err.message);
@@ -33,11 +62,10 @@ router.post('/', function(req, res){
 });
 
 // Get one userpedal
-router.get('/:id', function(req, res){
-	var pedalid = req.params.id;
-	console.log(pedalid);
+router.get('/:email', function(req, res){
+	var email = req.params.email;
 	userPedals.findOne({
-			where: {id: pedalid}
+			where: {email: email}
 		}).then(
 			function findOneSuccess(data){
 				res.json(data);
@@ -50,21 +78,21 @@ router.get('/:id', function(req, res){
 });
 
 // Update userpedal
-router.put('/:id', (req, res) => {
-	var pedalid = req.params.id;
-	var pedalId = req.body.pedalId;
+// router.put('/:id', (req, res) => {
+// 	var pedalid = req.params.id;
+// 	var pedalId = req.body.pedalId;
 
-	userPedals.update({pedalId: pedalId},
-		{where: {id: pedalid, email: req.user.email}})
+// 	userPedals.update({pedalId: pedalId},
+// 		{where: {email: req.user.email}})
 
-	  .then(userpedal => res.status(200).json(userpedal))
-	  .catch(err => res.json({error:err}))
-});
+// 	  .then(userpedal => res.status(200).json(userpedal))
+// 	  .catch(err => res.json({error:err}))
+// });
 
 // Delete userpedal
-router.delete('/:id', (req, res) => {
-	var pedalid = req.params.id;
-  userPedals.destroy({where : {id:pedalid}})
+router.delete('/', (req, res) => {
+	var email = req.body.email;
+  userPedals.destroy({where : {email:email}})
   .then(userpedal => res.status(200).json(userpedal))
   .catch(err => res.json({error:err}))
 });

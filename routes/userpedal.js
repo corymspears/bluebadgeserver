@@ -5,6 +5,7 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
 router.post('/', function(req, res){
+	console.log("i");
 
 	// values of user input are assigned to variables
     var email = req.body.email;
